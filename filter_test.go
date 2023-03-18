@@ -8,14 +8,14 @@ import (
 )
 
 type test struct {
-	sum int
+	sum uint
 }
 
-func (s *test) Sum() int {
+func (s *test) Sum() uint {
 	return s.sum
 }
 
-func NewTest(s int) *test {
+func NewTest(s uint) *test {
 	return &test{
 		sum: s,
 	}
@@ -25,21 +25,57 @@ func TestFilter_Add_Contains(t *testing.T) {
 	tests := []struct {
 		name    string
 		length  int
-		values  []int
-		values2 []int
-		want    []int
+		values  []uint
+		values2 []uint
+		want    []uint
 	}{
 		{
-			name:    "Add",
-			length:  11,
-			values:  []int{20, 50, 53, 75, 100, 67, 105, 3, 36, 39},
-			values2: []int{20, 50, 53, 75, 100, 67, 105, 3, 36, 39, 6},
-			want:    []int{20, 50, 53, 75, 100, 67, 3, 36, 39, 6},
+			name:   "Add",
+			length: 11,
+			values: []uint{20, 50, 53, 75, 100, 67, 105, 3, 36, 39},
+			want:   []uint{20, 50, 53, 75, 100, 67, 3, 36, 39},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filter := cuckoofilter.NewFilter[*test](2, tt.length)
+			filter := cuckoofilter.NewFilter[*test](30, 1, 1, 0)
+
+			for _, v := range tt.values {
+				err := filter.Add(NewTest(v))
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+
+			for _, v := range tt.want {
+				got := filter.Contains(NewTest(v))
+				if got != true {
+					t.Errorf("Filter.Contains(%v) = %v, want %v", v, got, true)
+				}
+			}
+		})
+	}
+}
+
+func TestFilter_Add_Rotate_Contains(t *testing.T) {
+	tests := []struct {
+		name    string
+		length  int
+		values  []uint
+		values2 []uint
+		want    []uint
+	}{
+		{
+			name:    "Add",
+			length:  11,
+			values:  []uint{20, 50, 53, 75, 100, 67, 105, 3, 36, 39},
+			values2: []uint{20, 50, 53, 75, 100, 67, 105, 3, 36, 39, 6},
+			want:    []uint{20, 50, 53, 75, 100, 67, 3, 36, 39, 6},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filter := cuckoofilter.NewFilter[*test](30, 1, 1, 0)
 
 			for _, v := range tt.values {
 				err := filter.Add(NewTest(v))
@@ -69,21 +105,21 @@ func TestFilter_Add_Delete_Contains(t *testing.T) {
 	tests := []struct {
 		name    string
 		length  int
-		values  []int
-		values2 []int
-		want    []int
+		values  []uint
+		values2 []uint
+		want    []uint
 	}{
 		{
 			name:    "Add",
 			length:  11,
-			values:  []int{20, 50, 53, 75, 100, 67, 105, 3, 36, 39},
-			values2: []int{20, 50, 53, 75, 100, 67, 105, 3, 36, 39, 6},
-			want:    []int{20, 50, 53, 75, 100, 67, 3, 36, 39, 6},
+			values:  []uint{20, 50, 53, 75, 100, 67, 105, 3, 36, 39},
+			values2: []uint{20, 50, 53, 75, 100, 67, 105, 3, 36, 39, 6},
+			want:    []uint{20, 50, 53, 75, 100, 67, 3, 36, 39, 6},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filter := cuckoofilter.NewFilter[*test](2, tt.length)
+			filter := cuckoofilter.NewFilter[*test](30, 4, 1, 11)
 
 			for _, v := range tt.values {
 				err := filter.Add(NewTest(v))
@@ -112,6 +148,50 @@ func TestFilter_Add_Delete_Contains(t *testing.T) {
 					if got != true {
 						t.Errorf("Filter.Contains() = %v, want %v", got, true)
 					}
+				}
+			}
+		})
+	}
+}
+
+func TestFilterFalsePositiveRate_Add_Contains(t *testing.T) {
+	tests := []struct {
+		name    string
+		length  int
+		values  []uint
+		values2 []uint
+		want    []uint
+	}{
+		{
+			name:    "Add",
+			length:  11,
+			values:  []uint{20, 50, 53, 75, 100, 67, 105, 3, 36, 39},
+			values2: []uint{20, 50, 53, 75, 100, 67, 105, 3, 36, 39, 6},
+			want:    []uint{20, 50, 53, 75, 100, 67, 3, 36, 39, 6},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filter := cuckoofilter.NewFilterFalsePositiveRate[*test](uint(tt.length), 0.1)
+
+			for _, v := range tt.values {
+				err := filter.Add(NewTest(v))
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+
+			for _, v := range tt.values2 {
+				err := filter.Add(NewTest(v))
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+
+			for _, v := range tt.want {
+				got := filter.Contains(NewTest(v))
+				if got != true {
+					t.Errorf("Filter.Contains() = %v, want %v", got, true)
 				}
 			}
 		})

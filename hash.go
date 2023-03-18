@@ -1,5 +1,5 @@
 package cuckoofilter
 
 type Hash interface {
-	Sum() int
+	Sum() uint
 }
