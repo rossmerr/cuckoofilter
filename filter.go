@@ -123,16 +123,18 @@ func (s *Filter[T]) Add(item T) error {
 	for n := uint(0); n < s.maxNumKicks; n++ {
 		// randomly select an entry e from bucket;
 		e := uint(rand.Intn(int(s.entriesPerBucket)))
-		f = s.buckets[i%s.length][e : e+s.fingerprintLength]
 		swap := s.swapIndex(f, i)
-		for r, v := range s.buckets[swap%s.length] {
-			// swap entry to alternate position
-			if v == 0 {
-				copy(s.buckets[swap%s.length][r:], f)
+		f = s.buckets[i%s.length][e : e+s.fingerprintLength]
+		b := s.buckets[swap%s.length]
+		for r := uint(0); r < uint(len(b)); r += uint(s.fingerprintLength) {
+			v := b[r : r+s.fingerprintLength]
+			if v[0] == 0 {
+				copy(b[r:r+s.fingerprintLength], f)
 				copy(s.buckets[i%s.length][e:], make([]byte, s.fingerprintLength))
 				return nil
 			}
 		}
+
 		i = swap
 	}
 
@@ -185,16 +187,16 @@ func (s *Filter[T]) Remove(item T) {
 	}
 }
 
-func (s *Filter[T]) Length() int {
-	return int(s.length)
+func (s *Filter[T]) Length() uint {
+	return s.length / 2
 }
 
 func (s *Filter[T]) swapIndex(f []byte, index uint) uint {
-	return index ^ (s.hash(f) & (s.length - 1))
+	return index ^ (s.hash(f) & (s.Length() - 1))
 }
 
 func (s *Filter[T]) index(f []byte, key uint) uint {
-	return key ^ (s.hash(f) & (s.length - 1))
+	return key ^ (s.hash(f) & (s.Length() - 1))
 }
 
 func upperPower2(x uint) uint {

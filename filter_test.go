@@ -38,7 +38,7 @@ func TestFilter_Add_Contains(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filter := cuckoofilter.NewFilter[*test](30, 1, 1, 0)
+			filter := cuckoofilter.NewFilter[*test](10, 4, 1, 10)
 
 			for _, v := range tt.values {
 				err := filter.Add(NewTest(v))
@@ -121,7 +121,7 @@ func TestFilter_Add_Rotate_Contains(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filter := cuckoofilter.NewFilter[*test](30, 1, 1, 0)
+			filter := cuckoofilter.NewFilter[*test](11, 4, 1, 0)
 
 			for _, v := range tt.values {
 				err := filter.Add(NewTest(v))
@@ -165,7 +165,7 @@ func TestFilter_Add_Delete_Contains(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filter := cuckoofilter.NewFilter[*test](30, 4, 1, 11)
+			filter := cuckoofilter.NewFilter[*test](11, 4, 1, 11)
 
 			for _, v := range tt.values {
 				err := filter.Add(NewTest(v))
