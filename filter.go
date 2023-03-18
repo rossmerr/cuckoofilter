@@ -165,6 +165,7 @@ func (s *Filter[T]) Remove(item T) {
 	for i := uint(0); i < uint(len(b1)); i += uint(s.fingerprintLength) {
 		if bytes.Equal(b1[i:i+s.fingerprintLength], f) {
 			copy(b1[i:i+s.fingerprintLength], make([]byte, s.fingerprintLength))
+			return
 		}
 	}
 
@@ -172,6 +173,7 @@ func (s *Filter[T]) Remove(item T) {
 	for i := uint(0); i < uint(len(b2)); i += uint(s.fingerprintLength) {
 		if bytes.Equal(b2[i:i+s.fingerprintLength], f) {
 			copy(b2[i:i+s.fingerprintLength], make([]byte, s.fingerprintLength))
+			return
 		}
 	}
 }

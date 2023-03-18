@@ -57,6 +57,52 @@ func TestFilter_Add_Contains(t *testing.T) {
 	}
 }
 
+func TestFilter_Matching(t *testing.T) {
+	tests := []struct {
+		name    string
+		length  int
+		values  []uint
+		values2 []uint
+		want    []uint
+	}{
+		{
+			name:   "Add",
+			length: 1,
+			values: []uint{20, 50, 53, 75},
+			want:   []uint{20, 50, 53, 75},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filter := cuckoofilter.NewFilter[*test](1, 4, 1, 0)
+
+			for _, v := range tt.values {
+				err := filter.Add(NewTest(v))
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+
+			for _, v := range tt.want {
+				got := filter.Contains(NewTest(v))
+				if got != true {
+					t.Errorf("Filter.Contains(%v) = %v, want %v", v, got, true)
+				}
+			}
+
+			for _, v := range tt.want {
+
+				filter.Remove(NewTest(v))
+				got := filter.Contains(NewTest(v))
+				if got != false {
+					t.Errorf("Filter.Contains() = %v, want %v", got, false)
+				}
+
+			}
+		})
+	}
+}
+
 func TestFilter_Add_Rotate_Contains(t *testing.T) {
 	tests := []struct {
 		name    string
