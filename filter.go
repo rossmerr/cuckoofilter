@@ -101,12 +101,6 @@ func (s *Filter[T]) Add(item T) error {
 		}
 	}
 
-	// for i, v := range b1 {
-	// 	if v == 0 {
-	// 		copy(b1[i:], f)
-	// 		return nil
-	// 	}
-	// }
 	b2 := s.buckets[i2%s.length]
 	for i := uint(0); i < uint(len(b2)); i += uint(s.fingerprintLength) {
 		v := b2[i : i+s.fingerprintLength]
@@ -117,13 +111,6 @@ func (s *Filter[T]) Add(item T) error {
 			return nil
 		}
 	}
-
-	// for i, v := range b2 {
-	// 	if v == 0 {
-	// 		copy(b2[i:], f)
-	// 		return nil
-	// 	}
-	// }
 
 	//randomly pick i1 or i2
 	i := uint(rand.Intn(2))
