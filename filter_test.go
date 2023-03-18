@@ -187,7 +187,7 @@ func TestFilter_Add_Delete_Contains(t *testing.T) {
 				filter.Remove(NewTest(v))
 				got := filter.Contains(NewTest(v))
 				if got != false {
-					t.Errorf("Filter.Contains() = %v, want %v", got, false)
+					t.Errorf("Filter.Contains(%v) = %v, want %v", v, got, false)
 				}
 				for _, v := range check {
 					got := filter.Contains(NewTest(v))

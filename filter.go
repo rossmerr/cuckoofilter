@@ -91,19 +91,39 @@ func (s *Filter[T]) Add(item T) error {
 	i2 := s.swapIndex(f, i1)
 
 	b1 := s.buckets[i1%s.length]
-	for i, v := range b1 {
-		if v == 0 {
+	for i := uint(0); i < uint(len(b1)); i += uint(s.fingerprintLength) {
+		v := b1[i : i+s.fingerprintLength]
+		if bytes.Equal(v, f) {
+			return nil
+		} else if v[0] == 0 {
 			copy(b1[i:], f)
 			return nil
 		}
 	}
+
+	// for i, v := range b1 {
+	// 	if v == 0 {
+	// 		copy(b1[i:], f)
+	// 		return nil
+	// 	}
+	// }
 	b2 := s.buckets[i2%s.length]
-	for i, v := range b2 {
-		if v == 0 {
+	for i := uint(0); i < uint(len(b2)); i += uint(s.fingerprintLength) {
+		v := b2[i : i+s.fingerprintLength]
+		if bytes.Equal(v, f) {
+			return nil
+		} else if v[0] == 0 {
 			copy(b2[i:], f)
 			return nil
 		}
 	}
+
+	// for i, v := range b2 {
+	// 	if v == 0 {
+	// 		copy(b2[i:], f)
+	// 		return nil
+	// 	}
+	// }
 
 	//randomly pick i1 or i2
 	i := uint(rand.Intn(2))
